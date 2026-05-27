@@ -1,64 +1,77 @@
 # Stage 1: Build environment and Composer dependencies
 FROM php:8.3-alpine AS builder
 
-# Install system dependencies + SQLITE DEVELOPMENT LIBRARIES (sqlite-dev)
+# Install system dependencies + PostgreSQL development libraries
 RUN apk add --no-cache \
     curl \
     unzip \
     libxml2-dev \
     libzip-dev \
-    sqlite-dev
+    postgresql-dev
 
-# Install the extensions needed for Laravel API + SQLite
+# Install PHP extensions needed for Laravel + PostgreSQL
 RUN docker-php-ext-install \
-    pdo_sqlite \
+    pdo_pgsql \
     bcmath \
     xml \
     zip
 
 WORKDIR /var/www
 
-# Copy the entire Laravel application code
+# Copy application code
 COPY . /var/www
 
-# Install Composer and production dependencies
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin \
+    --filename=composer
 
-# Stage 2: Ultra-lightweight Production environment
+# Install Laravel production dependencies
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-progress \
+    --prefer-dist
+
+# =========================================================
+
+# Stage 2: Production image
 FROM php:8.3-alpine AS production
 
-# Install runtime utilities and SQLite shared runtime libraries (sqlite-libs)
+# Install PostgreSQL runtime libraries
 RUN apk add --no-cache \
-    zip \
     unzip \
+    zip \
     libxml2-dev \
-    sqlite-libs
+    postgresql-libs
 
-# Copy installed extensions from the builder stage
+# Copy PHP extensions from builder
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
 WORKDIR /var/www
 
-# Copy the production PHP configuration
+# Use production PHP configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Copy the application code and vendor dependencies from the builder stage
+# Copy Laravel application
 COPY --from=builder /var/www /var/www
 
-RUN mkdir -p storage/framework/cache \
+# Create Laravel required directories
+RUN mkdir -p \
+    storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
-    bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    bootstrap/cache
 
-# Ensure directory permissions are accessible to the web process
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Set permissions
+RUN chmod -R 775 storage bootstrap/cache
 
-# Railway assigns a dynamic port, but defaults to 8080 if not defined
+# Render/Railway dynamic port
 ENV PORT=8080
+
 EXPOSE 8080
 
-# Run Laravel's native web server engine directly
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Start Laravel server
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
