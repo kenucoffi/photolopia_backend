@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('photographers', function (Blueprint $table) {
             $table->id();
-            $table->uuid("uuid")->default(DB::raw('(lower(hex(randomblob(16))))'));
+            $table->uuid('uuid')->unique();
             $table->foreignId("user_id")->constrained("users");
             $table->string("location")->nullable();
             $table->string("speciality")->nullable();
