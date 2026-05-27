@@ -47,6 +47,12 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Copy the application code and vendor dependencies from the builder stage
 COPY --from=builder /var/www /var/www
 
+RUN mkdir -p storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 # Ensure directory permissions are accessible to the web process
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
