@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'https://photolopia-frontend-d9bfgqt91-kenisa-s-projects.vercel.app')],
+    'allowed_origins' => [env('FRONTEND_URL', 'https://photolopia-frontend.vercel.app')],
 
     'allowed_origins_patterns' => [],
 
