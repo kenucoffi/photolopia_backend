@@ -188,6 +188,7 @@ class UserController extends Controller
         $user->username= $request->username;
         $user->email = $request->email;
         $user->photographer()->update(["speciality"=>$request->speciality,"location"=>$request->location,"phone"=> $request->phone,"instagram"=>$request->instagram]);
+        $user->save();
         return response(["message"=>"successfuly updated"]);
 
     }
