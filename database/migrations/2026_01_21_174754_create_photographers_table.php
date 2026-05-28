@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users");
             $table->string("location")->nullable();
             $table->string("speciality")->nullable();
-            $table->foreignId("profileImage_id")->nullable()->onDelete("cascade");
-            $table->foreignId("bigprofileImage_id")->nullable()->onDelete("cascade");
+            $table->foreignId("profileImage_id")->nullable()->constrained("images")->onDelete("cascade");
+            $table->foreignId("bigprofileImage_id")->nullable()->constrained("images")->onDelete("cascade");
             $table->string("phone")->nullable();
             $table->text("bio")->nullable();
             $table->string("instagram")->nullable();
