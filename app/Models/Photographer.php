@@ -17,10 +17,10 @@ class Photographer extends Model
     //
     protected $fillable = ["bio","speciality","instagram","phone","location","user_id","profileImage_id","bigprofileImage_id"];
     public function profile_image(){
-        return $this->hasOne(Image::class,"id","profileImage_id");
+        return $this->belongsTo(Image::class,"profileImage_id","id");
     }
     public function bigprofile_image(){
-        return $this->hasOne(Image::class,"id","bigprofileImage_id");
+        return $this->belongsTo(Image::class,"bigprofileImage_id","id");
     }
     public function user(){
         return $this->belongsTo(User::class,"user_id","id");

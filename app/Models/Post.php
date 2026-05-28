@@ -11,7 +11,7 @@ class Post extends Model
         return $this->belongsTo(User::class,"user_id","id");
     }
     function image(){
-        return $this->hasOne(Image::class,"id","post_image_id");
+        return $this->belongsTo(Image::class,"post_image_id","id");
     }
     protected $fillable  = ["title","description","post_type"];
 }
